@@ -1,14 +1,16 @@
 use axum::{
     Json, Router,
     extract::State,
-    http::StatusCode,
+    http::{HeaderValue, StatusCode, header},
     routing::{get, post},
 };
 use clap::Parser;
 use cli_codegen_backend::{codegen::generators::CodeGenerator, models::config::CliConfig};
+use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use tokio::net::TcpListener;
 use tower_http::services::ServeDir;
+use tower_http::set_header::SetResponseHeaderLayer;
 
 #[derive(Parser)]
 #[clap(
@@ -26,6 +28,13 @@ struct Args {
 #[derive(Clone)]
 struct AppState {
     config: CliConfig,
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+struct BuildInfo {
+    commit_sha: String,
+    build_time: String,
+    build_host: String,
 }
 
 #[tokio::main]
@@ -46,10 +55,15 @@ async fn start_web_server(port: u16) -> Result<(), Box<dyn std::error::Error>> {
         // API routes
         .route("/api/config", get(get_config).post(update_config))
         .route("/api/generate", post(api_generate))
-        // Serve static assets (favicon, etc.) from static directory
-        .nest_service("/static", ServeDir::new("static"))
+        .route("/api/build-info", get(get_build_info))
+        // Serve static assets (favicon, etc.) from static directory with no-cache headers
+        .nest_service("/static", ServeDir::new("crates/backend/static"))
+        .layer(SetResponseHeaderLayer::if_not_present(
+            header::CACHE_CONTROL,
+            HeaderValue::from_static("no-cache, no-store, must-revalidate"),
+        ))
         // Serve frontend from the index directory (symlinked to frontend/dist)
-        .nest_service("/", ServeDir::new("index"))
+        .nest_service("/", ServeDir::new("crates/backend/index"))
         .with_state(app_state);
 
     // Run our application
@@ -89,7 +103,7 @@ async fn api_generate(Json(config): Json<CliConfig>) -> Result<Json<Value>, Stat
     let sanitized_name = config
         .name
         .replace(|c: char| !c.is_alphanumeric() && c != '-' && c != '_', "_");
-    let output_dir = format!("../../work/{}", sanitized_name);
+    let output_dir = format!("work/{}", sanitized_name);
 
     // Create work directory if it doesn't exist
     std::fs::create_dir_all(&output_dir).map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
@@ -104,4 +118,14 @@ async fn api_generate(Json(config): Json<CliConfig>) -> Result<Json<Value>, Stat
         "output_dir": output_dir,
         "message": format!("CLI code generated successfully for '{}'", config.name)
     })))
+}
+
+async fn get_build_info() -> Json<BuildInfo> {
+    Json(BuildInfo {
+        commit_sha: option_env!("BUILD_COMMIT_SHA")
+            .unwrap_or("unknown")
+            .to_string(),
+        build_time: option_env!("BUILD_TIME").unwrap_or("unknown").to_string(),
+        build_host: option_env!("BUILD_HOST").unwrap_or("unknown").to_string(),
+    })
 }

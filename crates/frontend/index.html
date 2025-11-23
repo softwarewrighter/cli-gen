@@ -1,15 +1,20 @@
 <!DOCTYPE html>
-<html>
+<html class="h-full">
   <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CLI Code Generator</title>
     <base data-trunk-public-url />
-    <link rel="icon" type="image/x-icon" href="/static/favicon.ico" />
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico?ts=1763931434000" />
+    <script src="https://cdn.tailwindcss.com"></script>
   </head>
-  <body>
-    <div id="app">
-      <h1>CLI Code Generator Web UI</h1>
-      <p>Loading application...</p>
+  <body class="h-full bg-gray-50">
+    <div id="app" class="min-h-full flex items-center justify-center p-4">
+      <div class="text-center">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+        <h1 class="text-2xl font-semibold text-gray-900 mb-2">CLI Code Generator</h1>
+        <p class="text-gray-600">Loading application...</p>
+      </div>
     </div>
     <!-- trunk will replace this with the correct WASM initialization code -->
     <link data-trunk rel="rust" data-wasm-opt="z" />
