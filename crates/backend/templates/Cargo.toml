@@ -1,0 +1,16 @@
+[package]
+name = "{{ name }}"
+version = "{{ version }}"
+edition = "2024"
+authors = ["{{ author }}"]
+description = "{{ short_description }}"
+license = "{{ license }}"
+repository = "{{ repository }}"
+build = "build.rs"
+
+[dependencies]
+clap = { version = "4.5", features = ["derive"] }
+sw-cli = { path = "lib/sw-cli" }
+
+[build-dependencies]
+sw-cli = { path = "lib/sw-cli" }

@@ -111,11 +111,18 @@ cargo run -p cli-codegen-backend --bin cli_gen -- generate \
   --name my-cli \
   --short-desc "A brief description" \
   --long-desc "A longer description" \
-  --copyright "Copyright (c) 2025" \
+  --author "Your Name" \
+  --repository "https://github.com/yourusername/my-cli" \
   --license MIT \
-  --version-support \
-  --help-support \
   --output ./work/my-cli
+```
+
+After generation, setup and build the project:
+
+```bash
+cd work/my-cli
+./scripts/setup.sh    # Initialize git and add sw-cli submodule
+./scripts/build.sh    # Build the release binary
 ```
 
 ### Batch Processing
@@ -155,9 +162,34 @@ curl -X POST http://localhost:3000/api/generate \
 
 The tool generates the following files in `./work/<project-name>/`:
 
-- `build.rs` - Build script with version macro integration
-- `config.rs` - CLI configuration with clap parser
-- `dispatch.rs` - Command routing functionality
+```
+<project-name>/
+├── COPYRIGHT                   # Copyright notice
+├── Cargo.toml                 # Package manifest with sw-cli dependency
+├── .gitmodules                # Git submodule configuration
+├── .gitignore                 # Standard Rust .gitignore
+├── build.rs                   # Build script using sw-cli macros
+├── src/
+│   ├── main.rs                # Entry point with clap Parser and sw_cli::version!()
+│   ├── cli.rs                 # CLI argument definitions using clap derive
+│   ├── lib.rs                 # Library module exports
+│   ├── short-help.txt         # Brief help text
+│   └── long-help.txt          # Detailed help text
+├── scripts/
+│   ├── setup.sh              # Initialize git and sw-cli submodule (executable)
+│   └── build.sh              # Build with submodule update (executable)
+└── lib/                      # Created by setup.sh
+    └── sw-cli/               # Git submodule (initialized by setup.sh)
+```
+
+### sw-cli Integration
+
+All generated CLIs use the [sw-cli](https://github.com/softwarewrighter/sw-cli) library for:
+- **Version Information**: Automatic generation of version strings with build metadata
+- **Help Text Management**: Separate files for short/long help loaded at build time
+- **Build Metadata**: Git commit SHA, build timestamp, and hostname automatically included
+
+The generated CLI follows the same pattern as [markdown-checker](https://github.com/softwarewrighter/markdown-checker).
 
 ## Architecture
 

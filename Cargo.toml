@@ -3,6 +3,7 @@ members = [
     "crates/backend",
     "crates/frontend",
 ]
+exclude = ["work"]
 resolver = "2"
 
 [workspace.package]

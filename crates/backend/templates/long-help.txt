@@ -1,0 +1,24 @@
+{{ long_description }}
+
+ADDITIONAL OPTIONS:
+    -V, --version
+            Print version information including build metadata
+            (git commit, build timestamp, hostname)
+            Note: This flag is handled before argument parsing and will
+            cause the program to exit after displaying version info.
+
+EXAMPLES:
+    # Run with verbose output
+    {{ name }} --verbose
+
+    # Dry-run to see what would happen
+    {{ name }} --dry-run
+
+    # Show version information
+    {{ name }} --version
+
+EXIT CODES:
+    0 - Success
+    1 - Error occurred
+
+For more information, visit: {{ repository }}

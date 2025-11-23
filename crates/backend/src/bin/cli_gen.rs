@@ -27,6 +27,10 @@ enum CliCommands {
         #[clap(long = "long-desc")]
         long_description: Option<String>,
 
+        /// Author name
+        #[clap(short = 'a', long = "author")]
+        author: Option<String>,
+
         /// Copyright information
         #[clap(long = "copyright")]
         copyright: Option<String>,
@@ -34,6 +38,18 @@ enum CliCommands {
         /// License type (MIT, Apache2, GPL3)
         #[clap(long = "license", default_value = "MIT")]
         license: String,
+
+        /// Repository URL
+        #[clap(short = 'r', long = "repository")]
+        repository: Option<String>,
+
+        /// Version
+        #[clap(long = "version-string", default_value = "0.1.0")]
+        version: String,
+
+        /// sw-cli repository URL
+        #[clap(long = "sw-cli-url", default_value = "https://github.com/softwarewrighter/sw-cli.git")]
+        sw_cli_url: String,
 
         /// Output directory for generated code
         #[clap(short = 'o', long = "output", default_value = "./generated_cli")]
@@ -78,19 +94,24 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             name,
             short_description,
             long_description,
+            author,
             copyright,
             license,
+            repository,
+            version,
+            sw_cli_url,
             output_dir,
             version_support,
             help_support,
         } => {
             // Create configuration from command line arguments
             let config = CliConfig {
-                name,
+                name: name.clone(),
                 short_description: short_description
                     .unwrap_or_else(|| "A brief description of the CLI".to_string()),
                 long_description: long_description
                     .unwrap_or_else(|| "A longer description of what this CLI does".to_string()),
+                author: author.unwrap_or_else(|| "Your Name".to_string()),
                 copyright: copyright.unwrap_or_else(|| {
                     format!("Copyright (c) {}", chrono::Utc::now().date_naive().year())
                 }),
@@ -100,6 +121,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     "GPL3" => LicenseType::GPL3,
                     _ => LicenseType::Custom(license),
                 },
+                repository: repository.unwrap_or_else(|| {
+                    format!("https://github.com/yourusername/{}", name)
+                }),
+                version,
+                sw_cli_url,
                 version_support,
                 help_support,
             };

@@ -1,0 +1,4 @@
+{{ short_description }}
+
+Additional options (handled before argument parsing):
+  -V, --version  Print version information with build metadata
